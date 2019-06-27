@@ -1,5 +1,7 @@
 package com.example.android.pets;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -11,8 +13,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetsContract.PetsEntry;
+import com.example.android.pets.data.PetsHelper;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -30,6 +34,10 @@ public class EditorActivity extends AppCompatActivity {
 
     /** EditText field to enter the pet's gender */
     private Spinner mGenderSpinner;
+
+    //Database variables
+    private PetsHelper petsHelper;
+    private SQLiteDatabase db;
 
     /**
      * Gender of the pet. The possible values are:
@@ -50,6 +58,9 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner(); //function to set up the spinner
+
+        //Open the Pets db
+        petsHelper = new PetsHelper(this);
     }
 
     /**
@@ -106,6 +117,8 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
+                insertPetDB();
+                finish();
                 // Do nothing for now
                 return true;
             // Respond to a click on the "Delete" menu option
@@ -120,4 +133,47 @@ public class EditorActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void insertPetDB() {
+        //Set the db to write into it
+        db = petsHelper.getWritableDatabase();
+
+        //Enable to write the database
+        db = petsHelper.getWritableDatabase();
+
+        //Create the information to insert from the values edited
+        ContentValues values = new ContentValues();
+
+        //pet Name
+        String petName = mNameEditText.getText().toString().trim();
+        values.put(PetsEntry.COLUMN_PET_NAME, petName);
+
+        //pet Breed
+        String petBreed = mBreedEditText.getText().toString().trim();
+        values.put(PetsEntry.COLUMN_PET_BREED, petBreed);
+
+        //pet Gender
+        values.put(PetsEntry.COLUMN_PET_GENDER,mGender);
+
+
+        //Check if weight is empty or not
+        String petWeight = mWeightEditText.getText().toString().trim();
+        if (!petWeight.isEmpty()){
+            values.put(PetsEntry.COLUMN_PET_WEIGHT, Integer.parseInt(petWeight));
+        }
+        else {
+            values.put(PetsEntry.COLUMN_PET_WEIGHT,0);
+        }
+
+        //Insert the value into the DB
+        long result = db.insert(PetsEntry.TABLE_NAME,null,values);
+
+        Toast toast = Toast.makeText(this, Long.toString(result),Toast.LENGTH_SHORT);
+        toast.show();
+        //Close the Database
+        db.close();
+
+    }
+
+
 }

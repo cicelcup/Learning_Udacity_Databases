@@ -22,6 +22,7 @@ public class CatalogActivity extends AppCompatActivity {
     //Database object
     private PetsHelper petsHelper;
     private SQLiteDatabase db;
+    private String sqlResults;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,24 +60,28 @@ public class CatalogActivity extends AppCompatActivity {
 
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = db.rawQuery("SELECT * FROM " +
-                PetsEntry.TABLE_NAME, null);
+        /*Cursor cursor = db.rawQuery("SELECT * FROM " +
+                PetsEntry.TABLE_NAME, null);*/
+
+        Cursor cursor = db.query(PetsEntry.TABLE_NAME,
+                null,null,null,null,
+                null,null,null);
 
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
             TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-            String results = "";
+            sqlResults = "";
             cursor.moveToFirst();
             while(!cursor.isAfterLast()){
-                results += cursor.getString(0) + ", " +
+                sqlResults += cursor.getString(0) + ", " +
                         cursor.getString(1) + ", " +
                         cursor.getString(2) + ", " +
                         cursor.getString(3) + ", " +
                         cursor.getString(4) + "\n";
                 cursor.moveToNext();
             }
-            displayView.setText(results);
+            displayView.setText(sqlResults);
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
@@ -123,8 +128,17 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(PetsEntry.COLUMN_PET_GENDER,PetsEntry.GENDER_MALE);
         values.put(PetsEntry.COLUMN_PET_WEIGHT,7);
 
+        //Insert the value into the DB
         long result = db.insert(PetsEntry.TABLE_NAME,null,values);
+        //Close the Database
         db.close();
+        //Show the query results
+        displayDatabaseInfo();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         displayDatabaseInfo();
     }
 }
