@@ -1,5 +1,6 @@
 package com.example.android.pets;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,22 +12,30 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.android.pets.data.PetsContract;
+import com.example.android.pets.data.PetsContract.PetsEntry;
 import com.example.android.pets.data.PetsHelper;
 
 /**
  * Displays list of pets that were entered and stored in the app.
  */
 public class CatalogActivity extends AppCompatActivity {
+    //Database object
+    private PetsHelper petsHelper;
+    private SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //Set the layout to use in the activity
         setContentView(R.layout.activity_catalog);
 
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        //Initiating DB
+        petsHelper = new PetsHelper(this);
+
         //Click event to open the editor
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,24 +53,15 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        PetsHelper petsHelper = new PetsHelper(this);
 
         // Create and/or open a database to read from it
-        SQLiteDatabase db = petsHelper.getReadableDatabase();
+        db = petsHelper.getReadableDatabase();
 
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
         Cursor cursor = db.rawQuery("SELECT * FROM " +
-                PetsContract.PetsEntry.TABLE_NAME, null);
+                PetsEntry.TABLE_NAME, null);
 
-
-        TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-        displayView.setText("Number of rows in pets database table: " + cursor.getCount());
-        cursor.close();
-
-/*
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
@@ -72,7 +72,8 @@ public class CatalogActivity extends AppCompatActivity {
             // resources and makes it invalid.
             cursor.close();
         }
-*/
+
+        db.close();
     }
 
     //Created the option menu in the activity
@@ -91,7 +92,7 @@ public class CatalogActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
-                // Do nothing for now
+                insertDataInDB();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -99,5 +100,21 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void insertDataInDB() {
+        //Enable to write the database
+        db = petsHelper.getWritableDatabase();
+
+        //Create the information to insert
+        ContentValues values = new ContentValues();
+        values.put(PetsEntry.COLUMN_PET_NAME,"Toto");
+        values.put(PetsEntry.COLUMN_PET_BREED, "Terrier");
+        values.put(PetsEntry.COLUMN_PET_GENDER,PetsEntry.GENDER_MALE);
+        values.put(PetsEntry.COLUMN_PET_WEIGHT,7);
+
+        long result = db.insert(PetsEntry.TABLE_NAME,null,values);
+        db.close();
+        displayDatabaseInfo();
     }
 }
