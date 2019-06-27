@@ -58,15 +58,13 @@ public class CatalogActivity extends AppCompatActivity {
         // Create and/or open a database to read from it
         db = petsHelper.getReadableDatabase();
 
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-        /*Cursor cursor = db.rawQuery("SELECT * FROM " +
-                PetsEntry.TABLE_NAME, null);*/
+        String[] projectionQuery = new String[]{PetsEntry.COLUMN_PET_NAME,PetsEntry.COLUMN_PET_BREED};
+        String selection = PetsEntry.COLUMN_PET_GENDER +"=?";
+        String[] selectionArgs = new String[]{Integer.toString(PetsEntry.GENDER_FEMALE)};
 
         Cursor cursor = db.query(PetsEntry.TABLE_NAME,
-                null,null,null,null,
+                projectionQuery,selection,selectionArgs,null,
                 null,null,null);
-
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
@@ -74,11 +72,15 @@ public class CatalogActivity extends AppCompatActivity {
             sqlResults = "";
             cursor.moveToFirst();
             while(!cursor.isAfterLast()){
-                sqlResults += cursor.getString(0) + ", " +
-                        cursor.getString(1) + ", " +
-                        cursor.getString(2) + ", " +
-                        cursor.getString(3) + ", " +
-                        cursor.getString(4) + "\n";
+                for (int i = 0; i<cursor.getColumnCount();i++){
+                    if (i!=(cursor.getColumnCount()-1)){
+                        sqlResults += cursor.getString(i) + ", ";
+                    }
+                    else{
+                        sqlResults += cursor.getString(i) + "\n ";
+                    }
+
+                }
                 cursor.moveToNext();
             }
             displayView.setText(sqlResults);
