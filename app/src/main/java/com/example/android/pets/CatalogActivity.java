@@ -58,9 +58,15 @@ public class CatalogActivity extends AppCompatActivity {
         // Create and/or open a database to read from it
         db = petsHelper.getReadableDatabase();
 
-        String[] projectionQuery = new String[]{PetsEntry.COLUMN_PET_NAME,PetsEntry.COLUMN_PET_BREED};
+        String[] projectionQuery = {PetsEntry._ID,
+                PetsEntry.COLUMN_PET_NAME,
+                PetsEntry.COLUMN_PET_BREED,
+                PetsEntry.COLUMN_PET_GENDER,
+                PetsEntry.COLUMN_PET_WEIGHT
+        };
+
         String selection = PetsEntry.COLUMN_PET_GENDER +"=?";
-        String[] selectionArgs = new String[]{Integer.toString(PetsEntry.GENDER_FEMALE)};
+        String[] selectionArgs = {Integer.toString(PetsEntry.GENDER_FEMALE)};
 
         Cursor cursor = db.query(PetsEntry.TABLE_NAME,
                 projectionQuery,selection,selectionArgs,null,
@@ -69,12 +75,17 @@ public class CatalogActivity extends AppCompatActivity {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
             TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-            sqlResults = "";
+            sqlResults = PetsEntry._ID + " - " +
+                    PetsEntry.COLUMN_PET_NAME + " - " +
+                    PetsEntry.COLUMN_PET_BREED + " - " +
+                    PetsEntry.COLUMN_PET_GENDER + " - " +
+                    PetsEntry.COLUMN_PET_WEIGHT + "\n";
+
             cursor.moveToFirst();
             while(!cursor.isAfterLast()){
                 for (int i = 0; i<cursor.getColumnCount();i++){
                     if (i!=(cursor.getColumnCount()-1)){
-                        sqlResults += cursor.getString(i) + ", ";
+                        sqlResults += cursor.getString(i) + " - ";
                     }
                     else{
                         sqlResults += cursor.getString(i) + "\n ";
