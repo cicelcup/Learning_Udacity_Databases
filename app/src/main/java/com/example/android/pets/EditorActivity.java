@@ -135,9 +135,6 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void insertPetDB() {
-        //Set the db to write into it
-        db = petsHelper.getWritableDatabase();
-
         //Enable to write the database
         db = petsHelper.getWritableDatabase();
 

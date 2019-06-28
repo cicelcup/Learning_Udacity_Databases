@@ -22,6 +22,7 @@ public class CatalogActivity extends AppCompatActivity {
     //Database object
     private PetsHelper petsHelper;
     private SQLiteDatabase db;
+    //String provisional to print on screen
     private String sqlResults;
 
     @Override
@@ -58,6 +59,7 @@ public class CatalogActivity extends AppCompatActivity {
         // Create and/or open a database to read from it
         db = petsHelper.getReadableDatabase();
 
+        //Select the columns to show
         String[] projectionQuery = {PetsEntry._ID,
                 PetsEntry.COLUMN_PET_NAME,
                 PetsEntry.COLUMN_PET_BREED,
@@ -65,7 +67,10 @@ public class CatalogActivity extends AppCompatActivity {
                 PetsEntry.COLUMN_PET_WEIGHT
         };
 
+        //Indicate the field to filter
         String selection = PetsEntry.COLUMN_PET_GENDER +"=?";
+
+        //Indicate the arguments
         String[] selectionArgs = {Integer.toString(PetsEntry.GENDER_FEMALE)};
 
         Cursor cursor = db.query(PetsEntry.TABLE_NAME,
