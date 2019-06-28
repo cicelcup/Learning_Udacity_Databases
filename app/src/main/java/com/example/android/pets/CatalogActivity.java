@@ -3,7 +3,6 @@ package com.example.android.pets;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -12,16 +11,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.android.pets.data.PetsContract;
 import com.example.android.pets.data.PetsContract.PetsEntry;
-import com.example.android.pets.data.PetsHelper;
 
 /**
  * Displays list of pets that were entered and stored in the app.
  */
 public class CatalogActivity extends AppCompatActivity {
-    //Database object
-    private PetsHelper petsHelper;
-    private SQLiteDatabase db;
     //String provisional to print on screen
     private String sqlResults;
 
@@ -35,9 +31,6 @@ public class CatalogActivity extends AppCompatActivity {
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        //Initiating DB
-        petsHelper = new PetsHelper(this);
-
         //Click event to open the editor
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,6 +40,7 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
+        //Display the info of the database
         displayDatabaseInfo();
     }
 
@@ -55,8 +49,6 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-
-
 
         //Select the columns to show
         String[] projectionQuery = {PetsEntry._ID,
@@ -70,10 +62,10 @@ public class CatalogActivity extends AppCompatActivity {
         String selection = PetsEntry.COLUMN_PET_GENDER +"=?";
 
         //Indicate the arguments
-        String[] selectionArgs = {Integer.toString(PetsEntry.GENDER_FEMALE)};
+        String[] selectionArgs = {String.valueOf(PetsEntry.GENDER_FEMALE)};
 
         Cursor cursor = getContentResolver().query(PetsEntry.CONTENT_URI,projectionQuery,
-                selection,selectionArgs,null);
+                null,null,null);
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
@@ -121,7 +113,10 @@ public class CatalogActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
-                insertDataInDB();
+                //Call the insert method of a new pet
+                insertPet();
+                //Display the information of the database
+                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -131,28 +126,19 @@ public class CatalogActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void insertDataInDB() {
-        //Enable to write the database
-        db = petsHelper.getWritableDatabase();
-
+    private void insertPet() {
         //Create the information to insert
         ContentValues values = new ContentValues();
-        values.put(PetsEntry.COLUMN_PET_NAME,"Toto");
-        values.put(PetsEntry.COLUMN_PET_BREED, "Terrier");
-        values.put(PetsEntry.COLUMN_PET_GENDER,PetsEntry.GENDER_MALE);
-        values.put(PetsEntry.COLUMN_PET_WEIGHT,7);
-
-        //Insert the value into the DB
-        long result = db.insert(PetsEntry.TABLE_NAME,null,values);
-        //Close the Database
-        db.close();
-        //Show the query results
-        displayDatabaseInfo();
+        values.put(PetsContract.PetsEntry.COLUMN_PET_NAME,"TOTOCOKY");
+        values.put(PetsContract.PetsEntry.COLUMN_PET_BREED, "Shitzu");
+        values.put(PetsContract.PetsEntry.COLUMN_PET_GENDER, PetsContract.PetsEntry.GENDER_MALE);
+        values.put(PetsContract.PetsEntry.COLUMN_PET_WEIGHT,75);
+        getContentResolver().insert(PetsEntry.CONTENT_URI,values);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        //displayDatabaseInfo();
+     displayDatabaseInfo();
     }
 }

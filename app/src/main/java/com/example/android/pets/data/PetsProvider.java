@@ -45,7 +45,7 @@ public class PetsProvider extends ContentProvider {
         Cursor queryCursor;
 
         //Check the URI arrived
-        int match = sUriMatcher.match(uri);
+        final int match = sUriMatcher.match(uri);
 
         switch (match) {
             case PETS:
@@ -88,7 +88,16 @@ public class PetsProvider extends ContentProvider {
     //Insert using the content provider
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        return null;
+        //Check the URI arrived
+        final int match = sUriMatcher.match(uri);
+
+        switch (match){
+            case PETS:
+                return insertPet(uri, values);
+
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for: " + uri);
+        }
     }
 
     //delete using the content provider
@@ -101,5 +110,15 @@ public class PetsProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    private Uri insertPet(Uri uri, ContentValues values) {
+        //Enable to write the database
+        db = petsHelper.getWritableDatabase();
+        long id = db.insert(PetsContract.PetsEntry.TABLE_NAME,null,values);
+
+        //Insert the value into the DB
+        return ContentUris.withAppendedId(uri,id);
+
     }
 }
