@@ -11,7 +11,7 @@ public final class PetsContract {
     //Content Authority
     public static final String CONTENT_AUTHORITY = "com.example.android.pets";
     //Base content Uri (content// + Content Authority)
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content//" + CONTENT_AUTHORITY);
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     //Table
     public static final String PATH_PETS = "pets";
 

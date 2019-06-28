@@ -14,11 +14,12 @@ public class PetsProvider extends ContentProvider {
     private PetsHelper petsHelper;
     private SQLiteDatabase db;
 
-    //URI Information
+    //URI Information for decide the case
     private static final int PETS = 100;
     private static final int PETS_ID = 101;
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
+    // Static initializer. This is run the first time anything is called from this class.
     static {
         sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS, PETS);
         sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS + "/#",

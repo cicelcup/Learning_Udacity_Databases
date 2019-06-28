@@ -56,8 +56,7 @@ public class CatalogActivity extends AppCompatActivity {
      */
     private void displayDatabaseInfo() {
 
-        // Create and/or open a database to read from it
-        db = petsHelper.getReadableDatabase();
+
 
         //Select the columns to show
         String[] projectionQuery = {PetsEntry._ID,
@@ -73,9 +72,8 @@ public class CatalogActivity extends AppCompatActivity {
         //Indicate the arguments
         String[] selectionArgs = {Integer.toString(PetsEntry.GENDER_FEMALE)};
 
-        Cursor cursor = db.query(PetsEntry.TABLE_NAME,
-                projectionQuery,selection,selectionArgs,null,
-                null,null,null);
+        Cursor cursor = getContentResolver().query(PetsEntry.CONTENT_URI,projectionQuery,
+                selection,selectionArgs,null);
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
@@ -105,8 +103,6 @@ public class CatalogActivity extends AppCompatActivity {
             // resources and makes it invalid.
             cursor.close();
         }
-
-        db.close();
     }
 
     //Created the option menu in the activity
@@ -157,6 +153,6 @@ public class CatalogActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        displayDatabaseInfo();
+        //displayDatabaseInfo();
     }
 }
