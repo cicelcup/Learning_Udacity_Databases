@@ -127,7 +127,7 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void insertPet() {
-        //Create the information to insert
+        //Create the information to insert using the content provider
         ContentValues values = new ContentValues();
         values.put(PetsContract.PetsEntry.COLUMN_PET_NAME,"TOTOCOKY");
         values.put(PetsContract.PetsEntry.COLUMN_PET_BREED, "Shitzu");

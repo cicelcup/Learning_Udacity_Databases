@@ -53,5 +53,5 @@
     <string name="editor_insert_pet_successful">Pet saved</string>
 
     <!-- Toast message in editor when new pet has failed to be inserted [CHAR LIMIT=NONE] -->
-    <string name="editor_insert_pet_failed">Error with saving pet</string>
+    <string name="editor_insert_pet_failed">Error with saving pet. Please check the values</string>
 </resources>

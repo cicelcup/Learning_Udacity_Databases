@@ -109,8 +109,9 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                insertPetDB();
-                finish();
+                if (insertPetDB()){
+                    finish();
+                }
                 // Do nothing for now
                 return true;
             // Respond to a click on the "Delete" menu option
@@ -126,7 +127,7 @@ public class EditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void insertPetDB() {
+    private boolean insertPetDB() {
         //Create the information to insert from the values edited
         ContentValues values = new ContentValues();
 
@@ -141,27 +142,29 @@ public class EditorActivity extends AppCompatActivity {
         //pet Gender
         values.put(PetsEntry.COLUMN_PET_GENDER,mGender);
 
-
-        //Check if weight is empty or not
+        //pet Weight
         String petWeight = mWeightEditText.getText().toString().trim();
+
         if (!petWeight.isEmpty()){
             values.put(PetsEntry.COLUMN_PET_WEIGHT, Integer.parseInt(petWeight));
         }
         else {
-            values.put(PetsEntry.COLUMN_PET_WEIGHT,0);
+            Toast.makeText(this,"Weight cannot be null",Toast.LENGTH_SHORT).show();
         }
 
-        //Insert the value into the DB
+        //Insert the value into the DB using the context provider
         Uri uri = getContentResolver().insert(PetsEntry.CONTENT_URI,values);
 
         if (uri == null) {
             // If the new content URI is null, then there was an error with insertion.
             Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
                     Toast.LENGTH_SHORT).show();
+            return false;
         } else {
             // Otherwise, the insertion was successful and we can display a toast.
             Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
                     Toast.LENGTH_SHORT).show();
+            return true;
         }
     }
 

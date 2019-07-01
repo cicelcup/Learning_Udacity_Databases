@@ -7,22 +7,31 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
+
+import static com.example.android.pets.data.PetsContract.*;
+import static com.example.android.pets.data.PetsContract.PetsEntry.*;
 
 //Content Provider for the database
 public class PetsProvider extends ContentProvider {
-    //Database Helper
+    //Database Helper and database definition
     private PetsHelper petsHelper;
     private SQLiteDatabase db;
 
-    //URI Information for decide the case
+    //URI Information for decide the case (values are chosen arbitrary)
     private static final int PETS = 100;
     private static final int PETS_ID = 101;
+    //URI to identify when there's not match
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    //Log Tag
+    public static final String LOG_TAG = PetsProvider.class.getSimpleName();
 
-    // Static initializer. This is run the first time anything is called from this class.
+
+    /* Static initializer. This is run the first time anything is called from this class.
+    Create the Uri to check and compare*/
     static {
-        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS, PETS);
-        sUriMatcher.addURI(PetsContract.CONTENT_AUTHORITY, PetsContract.PATH_PETS + "/#",
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PETS, PETS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PETS + "/#",
                 PETS_ID);
     }
 
@@ -49,7 +58,7 @@ public class PetsProvider extends ContentProvider {
 
         switch (match) {
             case PETS:
-                queryCursor = db.query(PetsContract.PetsEntry.TABLE_NAME,
+                queryCursor = db.query(TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -59,11 +68,11 @@ public class PetsProvider extends ContentProvider {
                 break;
             case PETS_ID:
                 //Select the id
-                selection = PetsContract.PetsEntry._ID + "=?";
+                selection = _ID + "=?";
                 // Select value to filter
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 //do the query
-                queryCursor = db.query(PetsContract.PetsEntry.TABLE_NAME,
+                queryCursor = db.query(TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -112,10 +121,37 @@ public class PetsProvider extends ContentProvider {
         return 0;
     }
 
+    //Method to insert data into the database
     private Uri insertPet(Uri uri, ContentValues values) {
         //Enable to write the database
         db = petsHelper.getWritableDatabase();
-        long id = db.insert(PetsContract.PetsEntry.TABLE_NAME,null,values);
+
+        //Data Sanity Check
+        String name = values.getAsString(COLUMN_PET_NAME);
+
+        //Check if the name is empty
+        if (name == null || name.isEmpty()){
+            return null;
+        }
+
+        Integer gender = values.getAsInteger(COLUMN_PET_GENDER);
+        //Check if the gender is valid or not
+        if (gender == null || !isValidGender(gender)){
+            return null;
+        }
+
+        Integer weight = values.getAsInteger(COLUMN_PET_WEIGHT);
+        //Check if the weight is valid or not
+        if (weight == null || weight <0 ){
+            return null;
+        }
+
+        long id = db.insert(TABLE_NAME,null,values);
+
+        if (id == -1) {
+            Log.e(LOG_TAG, "Failed to insert row for " + uri);
+            return null;
+        }
 
         //Insert the value into the DB
         return ContentUris.withAppendedId(uri,id);
