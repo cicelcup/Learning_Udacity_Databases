@@ -29,11 +29,12 @@ public class PetsProvider extends ContentProvider {
     //URI Information for decide the case (values are chosen arbitrary)
     private static final int PETS = 100;
     private static final int PET_ID = 101;
+
     //URI to identify when there's not match
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
     //Log Tag
     public static final String LOG_TAG = PetsProvider.class.getSimpleName();
-
 
     /* Static initializer. This is run the first time anything is called from this class.
     Create the Uri to check and compare*/
@@ -65,6 +66,7 @@ public class PetsProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
 
         switch (match) {
+            //Query the whole table
             case PETS:
                 queryCursor = db.query(TABLE_NAME,
                         projection,
@@ -74,6 +76,8 @@ public class PetsProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+
+            //Query a selection
             case PET_ID:
                 //Select the id
                 selection = _ID + "=?";
@@ -88,6 +92,8 @@ public class PetsProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
+
+            //throw a exception if an option not valid is received
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
@@ -102,10 +108,14 @@ public class PetsProvider extends ContentProvider {
 
         final int match = sUriMatcher.match(uri);
         switch (match) {
+            //Return dir type
             case PETS:
                 return CONTENT_LIST_TYPE;
+
+            //Return item type
             case PET_ID:
                 return CONTENT_ITEM_TYPE;
+
             default:
                 throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
         }
@@ -117,13 +127,11 @@ public class PetsProvider extends ContentProvider {
         //Check the URI arrived
         final int match = sUriMatcher.match(uri);
 
-        switch (match) {
-            case PETS:
-                return insertPet(uri, values);
-
-            default:
-                throw new IllegalArgumentException("Insertion is not supported for: " + uri);
+        //Insert the values into the database
+        if (match == PETS) {
+            return insertPet(uri, values);
         }
+        throw new IllegalArgumentException("Insertion is not supported for: " + uri);
     }
 
     //delete using the content provider
@@ -132,27 +140,32 @@ public class PetsProvider extends ContentProvider {
         //Open the database for writing
         db = petsHelper.getWritableDatabase();
 
+        //Variable to check the uri
         final int match = sUriMatcher.match(uri);
 
         switch (match) {
+            // Delete all rows that match the selection and selection args
             case PETS:
-                // Delete all rows that match the selection and selection args
                 return db.delete(TABLE_NAME, selection, selectionArgs);
+
+            //Delete a single row
             case PET_ID:
                 selection = _ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 return db.delete(TABLE_NAME, selection, selectionArgs);
+
+            //Throw an exception
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
     }
 
 
-
     //update using the content provider
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
+
         switch (match) {
             //update the whole table
             case PETS:
@@ -176,7 +189,7 @@ public class PetsProvider extends ContentProvider {
         db = petsHelper.getWritableDatabase();
 
         //Check that every field is set properly
-        if (sanityCheck(values) == true) {
+        if (sanityCheck(values)) {
             //Check if the size of values is different than 0
             if (values.size() != 0) {
                 return db.update(TABLE_NAME, values, selection, selectionArgs);
@@ -195,7 +208,7 @@ public class PetsProvider extends ContentProvider {
         db = petsHelper.getWritableDatabase();
 
         //Check the data
-        if (sanityCheck(values) == true) {
+        if (sanityCheck(values)) {
             long id = db.insert(TABLE_NAME, null, values);
 
             if (id == -1) {
@@ -227,9 +240,6 @@ public class PetsProvider extends ContentProvider {
 
         Integer weight = values.getAsInteger(COLUMN_PET_WEIGHT);
         //Check if the weight is valid or not
-        if (weight == null || weight < 0) {
-            return false;
-        }
-        return true;
+        return weight != null && weight >= 0;
     }
 }

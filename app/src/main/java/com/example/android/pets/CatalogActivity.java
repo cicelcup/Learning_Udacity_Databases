@@ -69,31 +69,38 @@ public class CatalogActivity extends AppCompatActivity {
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
-            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
+            TextView displayView = findViewById(R.id.text_view_pet);
             sqlResults = PetsEntry._ID + " - " +
                     PetsEntry.COLUMN_PET_NAME + " - " +
                     PetsEntry.COLUMN_PET_BREED + " - " +
                     PetsEntry.COLUMN_PET_GENDER + " - " +
                     PetsEntry.COLUMN_PET_WEIGHT + "\n";
 
-            cursor.moveToFirst();
-            while(!cursor.isAfterLast()){
-                for (int i = 0; i<cursor.getColumnCount();i++){
-                    if (i!=(cursor.getColumnCount()-1)){
-                        sqlResults += cursor.getString(i) + " - ";
-                    }
-                    else{
-                        sqlResults += cursor.getString(i) + "\n ";
-                    }
+            if (cursor != null) {
+                cursor.moveToFirst();
 
+                while(!cursor.isAfterLast()){
+                    for (int i = 0; i<cursor.getColumnCount();i++){
+                        if (i!=(cursor.getColumnCount()-1)){
+                            sqlResults += cursor.getString(i) + " - ";
+                        }
+                        else{
+                            sqlResults += cursor.getString(i) + "\n ";
+                        }
+
+                    }
+                    cursor.moveToNext();
                 }
-                cursor.moveToNext();
             }
+
+
             displayView.setText(sqlResults);
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 

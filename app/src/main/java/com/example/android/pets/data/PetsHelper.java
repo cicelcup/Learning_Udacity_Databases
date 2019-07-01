@@ -8,21 +8,22 @@ import static com.example.android.pets.data.PetsContract.PetsEntry;
 public class PetsHelper extends SQLiteOpenHelper {
 
     //Version of the database
-    public static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 1;
 
     //Name of the data base
-    public static final String DATABASE_NAME = "shelter.db";
+    private static final String DATABASE_NAME = "shelter.db";
 
 
     //Constructor
-    public PetsHelper( Context context) {
+    PetsHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     //Create the Database
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //SQL Statement to create the database according the Schema
+        /*SQL Statement to create the database according the Schema using a primary key, not null
+         qualifier and default value*/
         final String SQL_CREATE_PETS = "CREATE TABLE " +
                 PetsEntry.TABLE_NAME + " (" +
                 PetsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +

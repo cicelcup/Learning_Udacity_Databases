@@ -6,17 +6,16 @@ import android.provider.BaseColumns;
 
 public final class PetsContract {
     //Private Constructor for not allowing the creation of a instance of this class
+
     private PetsContract() { }
 
     //constants for the content provider
     //Content Authority
-    public static final String CONTENT_AUTHORITY = "com.example.android.pets";
+    static final String CONTENT_AUTHORITY = "com.example.android.pets";
     //Base content Uri (content// + Content Authority)
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-    //Table
-    public static final String PATH_PETS = "pets";
-
-
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    //Table name
+    static final String PATH_PETS = "pets";
 
     //Inner Class for defining the table name
 
@@ -28,7 +27,7 @@ public final class PetsContract {
 
 
         //Name of the table for pets
-        public final static String TABLE_NAME = "pets";
+        final static String TABLE_NAME = "pets";
 
         //ID of the register
         public final static String _ID = BaseColumns._ID;
@@ -50,20 +49,17 @@ public final class PetsContract {
         public static final int GENDER_MALE = 1;
         public static final int GENDER_FEMALE = 2;
 
-        public static final String CONTENT_LIST_TYPE =
+        //MIME to return from get-type method  for the whole table
+        static final String CONTENT_LIST_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PETS;
 
-        public static final String CONTENT_ITEM_TYPE =
+        //MIME to return from get-type method for a single item
+        static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PETS;
 
         //Check if it's a valid gender
-        public static boolean isValidGender(int gender){
-            if(gender == GENDER_UNKNOWN || gender == GENDER_MALE || gender == GENDER_MALE){
-                return true;
-            }
-            else{
-                return false;
-            }
+        static boolean isValidGender(int gender){
+            return gender == GENDER_UNKNOWN || gender == GENDER_MALE || gender == GENDER_FEMALE;
         }
 
     }
