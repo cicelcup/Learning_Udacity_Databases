@@ -14,6 +14,8 @@ import static com.example.android.pets.data.PetsContract.PATH_PETS;
 import static com.example.android.pets.data.PetsContract.PetsEntry.COLUMN_PET_GENDER;
 import static com.example.android.pets.data.PetsContract.PetsEntry.COLUMN_PET_NAME;
 import static com.example.android.pets.data.PetsContract.PetsEntry.COLUMN_PET_WEIGHT;
+import static com.example.android.pets.data.PetsContract.PetsEntry.CONTENT_ITEM_TYPE;
+import static com.example.android.pets.data.PetsContract.PetsEntry.CONTENT_LIST_TYPE;
 import static com.example.android.pets.data.PetsContract.PetsEntry.TABLE_NAME;
 import static com.example.android.pets.data.PetsContract.PetsEntry._ID;
 import static com.example.android.pets.data.PetsContract.PetsEntry.isValidGender;
@@ -97,7 +99,16 @@ public class PetsProvider extends ContentProvider {
     //Returns the MIME type of data for the content URI
     @Override
     public String getType(Uri uri) {
-        return null;
+
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return CONTENT_LIST_TYPE;
+            case PET_ID:
+                return CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+        }
     }
 
     //Insert using the content provider
@@ -118,8 +129,25 @@ public class PetsProvider extends ContentProvider {
     //delete using the content provider
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        //Open the database for writing
+        db = petsHelper.getWritableDatabase();
+
+        final int match = sUriMatcher.match(uri);
+
+        switch (match) {
+            case PETS:
+                // Delete all rows that match the selection and selection args
+                return db.delete(TABLE_NAME, selection, selectionArgs);
+            case PET_ID:
+                selection = _ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                return db.delete(TABLE_NAME, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
     }
+
+
 
     //update using the content provider
     @Override
