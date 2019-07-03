@@ -71,6 +71,10 @@ public class CatalogActivity extends AppCompatActivity {
         //Search the listView for the data
         ListView listView = findViewById(R.id.pet_data_list_view);
 
+        //Set the empty view to the list
+        View emptyView = findViewById(R.id.empty_view);
+        listView.setEmptyView(emptyView);
+
         //Set the cursor adapter
         PetsCursorAdapter petsCursorAdapter = new PetsCursorAdapter(this,cursor);
         listView.setAdapter(petsCursorAdapter);
