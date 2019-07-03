@@ -54,4 +54,6 @@
 
     <!-- Toast message in editor when new pet has failed to be inserted [CHAR LIMIT=NONE] -->
     <string name="editor_insert_pet_failed">Error with saving pet. Please check the values</string>
+
+    <string name="unknown_breed">Unknown breed</string>
 </resources>
