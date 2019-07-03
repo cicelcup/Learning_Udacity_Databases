@@ -1,4 +1,4 @@
-package com.example.android.pets.data;
+package com.example.android.pets;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -9,6 +9,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.example.android.pets.R;
+import com.example.android.pets.data.PetsContract;
 
 public class PetsCursorAdapter extends CursorAdapter {
     //Constructor of the cursor adapter
@@ -33,10 +34,11 @@ public class PetsCursorAdapter extends CursorAdapter {
         //Text View for the breed
         TextView breedNameView = view.findViewById(R.id.pet_breed);
         int petBreedIndex = cursor.getColumnIndex(PetsContract.PetsEntry.COLUMN_PET_BREED);
-        String petBreed = cursor.getColumnName(petBreedIndex);
+        String petBreed = cursor.getString(petBreedIndex);
+
 
         //Check if the breed comes null or not
-        if (petBreed != null) {
+        if (!petBreed.isEmpty()) {
             breedNameView.setText(petBreed);
         } else {
             breedNameView.setText(R.string.unknown_breed);

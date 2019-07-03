@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ListView;
 
 import com.example.android.pets.data.PetsContract;
 import com.example.android.pets.data.PetsContract.PetsEntry;
@@ -64,44 +64,16 @@ public class CatalogActivity extends AppCompatActivity {
         //Indicate the arguments
         String[] selectionArgs = {String.valueOf(PetsEntry.GENDER_FEMALE)};
 
+        //Query the cursor using the content resolver to search the content provider
         Cursor cursor = getContentResolver().query(PetsEntry.CONTENT_URI,projectionQuery,
                 null,null,null);
-        try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // pets table in the database).
-            TextView displayView = findViewById(R.id.text_view_pet);
-            sqlResults = PetsEntry._ID + " - " +
-                    PetsEntry.COLUMN_PET_NAME + " - " +
-                    PetsEntry.COLUMN_PET_BREED + " - " +
-                    PetsEntry.COLUMN_PET_GENDER + " - " +
-                    PetsEntry.COLUMN_PET_WEIGHT + "\n";
 
-            if (cursor != null) {
-                cursor.moveToFirst();
+        //Search the listView for the data
+        ListView listView = findViewById(R.id.pet_data_list_view);
 
-                while(!cursor.isAfterLast()){
-                    for (int i = 0; i<cursor.getColumnCount();i++){
-                        if (i!=(cursor.getColumnCount()-1)){
-                            sqlResults += cursor.getString(i) + " - ";
-                        }
-                        else{
-                            sqlResults += cursor.getString(i) + "\n ";
-                        }
-
-                    }
-                    cursor.moveToNext();
-                }
-            }
-
-
-            displayView.setText(sqlResults);
-        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
+        //Set the cursor adapter
+        PetsCursorAdapter petsCursorAdapter = new PetsCursorAdapter(this,cursor);
+        listView.setAdapter(petsCursorAdapter);
     }
 
     //Created the option menu in the activity
@@ -136,7 +108,7 @@ public class CatalogActivity extends AppCompatActivity {
     private void insertPet() {
         //Create the information to insert using the content provider
         ContentValues values = new ContentValues();
-        values.put(PetsContract.PetsEntry.COLUMN_PET_NAME,"TOTOCOKY");
+        values.put(PetsContract.PetsEntry.COLUMN_PET_NAME,"Tululi");
         values.put(PetsContract.PetsEntry.COLUMN_PET_BREED, "Shitzu");
         values.put(PetsContract.PetsEntry.COLUMN_PET_GENDER, PetsContract.PetsEntry.GENDER_MALE);
         values.put(PetsContract.PetsEntry.COLUMN_PET_WEIGHT,75);
