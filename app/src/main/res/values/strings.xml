@@ -16,8 +16,6 @@
     <!-- Title for the activity to add a new pet [CHAR LIMIT=20] -->
     <string name="editor_activity_title_edit_pet">Edit Pet</string>
 
-
-
     <!-- Label for editor menu option to save pet and leave editor [CHAR LIMIT=20] -->
     <string name="action_save">Save</string>
 
@@ -57,8 +55,14 @@
     <!-- Toast message in editor when new pet has been successfully inserted [CHAR LIMIT=NONE] -->
     <string name="editor_insert_pet_successful">Pet saved</string>
 
+    <!-- Toast message in editor when update pet has been successfully done [CHAR LIMIT=NONE] -->
+    <string name="editor_save_pet_successful">Pet edit successful</string>
+
     <!-- Toast message in editor when new pet has failed to be inserted [CHAR LIMIT=NONE] -->
-    <string name="editor_insert_pet_failed">Error with saving pet. Please check the values</string>
+    <string name="editor_insert_pet_failed">Error with inserting pet. Please check the values</string>
+
+    <!-- Toast message in editor when update pet has failed [CHAR LIMIT=NONE] -->
+    <string name="editor_save_pet_failed">Error with saving pet. Please check the values</string>
 
     <string name="unknown_breed">Unknown breed</string>
 

@@ -140,7 +140,7 @@ public class EditorActivity extends AppCompatActivity
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                if (insertPetDB()) {
+                if (savePetDB()) {
                     finish();
                 }
                 // Do nothing for now
@@ -158,7 +158,7 @@ public class EditorActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private boolean insertPetDB() {
+    private boolean savePetDB() {
         //Create the information to insert from the values edited
         ContentValues values = new ContentValues();
 
@@ -182,20 +182,38 @@ public class EditorActivity extends AppCompatActivity
             Toast.makeText(this, "Weight cannot be null", Toast.LENGTH_SHORT).show();
         }
 
-        //Insert the value into the DB using the context provider
-        Uri uri = getContentResolver().insert(PetsEntry.CONTENT_URI, values);
+        if (currentUri == null){
+            //Insert the value into the DB using the context provider
+            Uri uri = getContentResolver().insert(PetsEntry.CONTENT_URI, values);
 
-        if (uri == null) {
-            // If the new content URI is null, then there was an error with insertion.
-            Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
-                    Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            // Otherwise, the insertion was successful and we can display a toast.
-            Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
-                    Toast.LENGTH_SHORT).show();
-            return true;
+            if (uri == null) {
+                // If the new content URI is null, then there was an error with insertion.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+                return false;
+            } else {
+                // Otherwise, the insertion was successful and we can display a toast.
+                Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+                return true;
+            }
         }
+        else{
+            int rowsAffected = getContentResolver().update(
+                    currentUri, values, null, null);
+
+            if(rowsAffected == 0){
+                Toast.makeText(this, getString(R.string.editor_save_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            else{
+                Toast.makeText(this, getString(R.string.editor_save_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        }
+
     }
 
     @Override
@@ -219,6 +237,7 @@ public class EditorActivity extends AppCompatActivity
 
     }
 
+    //After the thread is finished
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data == null || data.getCount() < 1) {
@@ -236,7 +255,7 @@ public class EditorActivity extends AppCompatActivity
             //Set the values of the fields
             mNameEditText.setText(data.getString(nameColumnIndex));
             mBreedEditText.setText(data.getString(breedColumnIndex));
-            mWeightEditText.setText(Integer.toString(data.getInt(weightColumnIndex)));
+            mWeightEditText.setText(String.valueOf(data.getInt(weightColumnIndex)));
             mGender = data.getInt(genderColumnIndex);
 
             switch (mGender) {
@@ -253,8 +272,12 @@ public class EditorActivity extends AppCompatActivity
         }
     }
 
+    //Reset the thread
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        mNameEditText.setText("");
+        mBreedEditText.setText("");
+        mWeightEditText.setText("");
+        mGenderSpinner.setSelection(0);
     }
 }
