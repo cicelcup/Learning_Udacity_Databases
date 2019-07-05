@@ -136,89 +136,6 @@ public class PetsProvider extends ContentProvider {
         throw new IllegalArgumentException("Insertion is not supported for: " + uri);
     }
 
-    //delete using the content provider
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        //Open the database for writing
-        db = petsHelper.getWritableDatabase();
-
-        //Variable to check the uri
-        final int match = sUriMatcher.match(uri);
-        int rowsdeleted;
-
-        switch (match) {
-            // Delete all rows that match the selection and selection args
-            case PETS:
-                rowsdeleted = db.delete(TABLE_NAME, selection, selectionArgs);
-                break;
-
-            //Delete a single row
-            case PET_ID:
-                selection = _ID + "=?";
-                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                rowsdeleted = db.delete(TABLE_NAME, selection, selectionArgs);
-                break;
-
-            //Throw an exception
-            default:
-                throw new IllegalArgumentException("Deletion is not supported for " + uri);
-        }
-
-        if(rowsdeleted !=0){
-            getContext().getContentResolver().notifyChange(uri,null);
-        }
-
-        return rowsdeleted;
-    }
-
-
-    //update using the content provider
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        final int match = sUriMatcher.match(uri);
-
-        switch (match) {
-            //update the whole table
-            case PETS:
-                return updatePet(uri,values, selection, selectionArgs);
-            //Update the selection
-            case PET_ID:
-                selection = _ID + "=?";
-                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return updatePet(uri, values, selection, selectionArgs);
-            //throw an exception
-            default:
-                throw new IllegalArgumentException("Insertion is not supported for: " + uri);
-
-        }
-    }
-
-    //Method to update the database
-    private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-
-        //Open the database
-        db = petsHelper.getWritableDatabase();
-
-        //Check that every field is set properly
-        if (sanityCheck(values)) {
-            //Check if the size of values is different than 0
-            if (values.size() != 0) {
-                //Notify the change
-                int rowsudpdate = db.update(TABLE_NAME, values, selection, selectionArgs);
-
-                if(rowsudpdate!=0){
-                    getContext().getContentResolver().notifyChange(uri,null);
-                }
-                return rowsudpdate;
-            } else {
-                return 0;
-            }
-        } else {
-            return 0;
-        }
-
-    }
-
     //Method to insert data into the database
     private Uri insertPet(Uri uri, ContentValues values) {
         //Enable to write the database
@@ -240,6 +157,88 @@ public class PetsProvider extends ContentProvider {
         } else {
             return null;
         }
+    }
+
+    /*delete using the content provider*/
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        //Open the database for writing
+        db = petsHelper.getWritableDatabase();
+
+        //Variable to check the uri
+        final int match = sUriMatcher.match(uri);
+        int rowsDeleted;
+
+        switch (match) {
+            // Delete all rows that match the selection and selection args
+            case PETS:
+                rowsDeleted = db.delete(TABLE_NAME, selection, selectionArgs);
+                break;
+
+            //Delete a single row
+            case PET_ID:
+                selection = _ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                rowsDeleted = db.delete(TABLE_NAME, selection, selectionArgs);
+                break;
+
+            //Throw an exception
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
+
+        if(rowsDeleted !=0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
+
+        return rowsDeleted;
+    }
+
+    /*method to update the database*/
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        final int match = sUriMatcher.match(uri);
+
+        switch (match) {
+            //update the whole table
+            case PETS:
+                return updatePet(uri,values, selection, selectionArgs);
+            //Update the selection
+            case PET_ID:
+                selection = _ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return updatePet(uri, values, selection, selectionArgs);
+            //throw an exception
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for: " + uri);
+
+        }
+    }
+
+    private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+
+        //Open the database
+        db = petsHelper.getWritableDatabase();
+
+        //Check that every field is set properly
+        if (sanityCheck(values)) {
+            //Check if the size of values is different than 0
+            if (values.size() != 0) {
+                //Notify the change
+                int rowsUpdate = db.update(TABLE_NAME, values, selection, selectionArgs);
+
+                if(rowsUpdate !=0){
+                    getContext().getContentResolver().notifyChange(uri,null);
+                }
+                return rowsUpdate;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+
     }
 
     //Check if the data is setting corrected it
