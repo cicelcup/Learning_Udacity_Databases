@@ -98,7 +98,9 @@ public class PetsProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
 
-
+        //Set the notification when the data change.
+        queryCursor.setNotificationUri(getContext().getContentResolver(),uri);
+        //Return the cursor
         return queryCursor;
     }
 
@@ -142,22 +144,31 @@ public class PetsProvider extends ContentProvider {
 
         //Variable to check the uri
         final int match = sUriMatcher.match(uri);
+        int rowsdeleted;
 
         switch (match) {
             // Delete all rows that match the selection and selection args
             case PETS:
-                return db.delete(TABLE_NAME, selection, selectionArgs);
+                rowsdeleted = db.delete(TABLE_NAME, selection, selectionArgs);
+                break;
 
             //Delete a single row
             case PET_ID:
                 selection = _ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return db.delete(TABLE_NAME, selection, selectionArgs);
+                rowsdeleted = db.delete(TABLE_NAME, selection, selectionArgs);
+                break;
 
             //Throw an exception
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
+
+        if(rowsdeleted !=0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
+
+        return rowsdeleted;
     }
 
 
@@ -169,12 +180,12 @@ public class PetsProvider extends ContentProvider {
         switch (match) {
             //update the whole table
             case PETS:
-                return updatePet(values, selection, selectionArgs);
+                return updatePet(uri,values, selection, selectionArgs);
             //Update the selection
             case PET_ID:
                 selection = _ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return updatePet(values, selection, selectionArgs);
+                return updatePet(uri, values, selection, selectionArgs);
             //throw an exception
             default:
                 throw new IllegalArgumentException("Insertion is not supported for: " + uri);
@@ -183,7 +194,7 @@ public class PetsProvider extends ContentProvider {
     }
 
     //Method to update the database
-    private int updatePet(ContentValues values, String selection, String[] selectionArgs) {
+    private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 
         //Open the database
         db = petsHelper.getWritableDatabase();
@@ -192,7 +203,13 @@ public class PetsProvider extends ContentProvider {
         if (sanityCheck(values)) {
             //Check if the size of values is different than 0
             if (values.size() != 0) {
-                return db.update(TABLE_NAME, values, selection, selectionArgs);
+                //Notify the change
+                int rowsudpdate = db.update(TABLE_NAME, values, selection, selectionArgs);
+
+                if(rowsudpdate!=0){
+                    getContext().getContentResolver().notifyChange(uri,null);
+                }
+                return rowsudpdate;
             } else {
                 return 0;
             }
@@ -215,6 +232,9 @@ public class PetsProvider extends ContentProvider {
                 Log.e(LOG_TAG, "Failed to insert row for " + uri);
                 return null;
             }
+
+            //Set the notification of the uri
+            getContext().getContentResolver().notifyChange(uri,null);
             //Insert the value into the DB
             return ContentUris.withAppendedId(uri, id);
         } else {
