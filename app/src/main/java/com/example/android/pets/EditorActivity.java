@@ -1,7 +1,11 @@
 package com.example.android.pets;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -21,18 +25,22 @@ import com.example.android.pets.data.PetsContract.PetsEntry;
 /**
  * Allows user to create a new pet or edit an existing one.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /** EditText field to enter the pet's name */
+    /*constant to call the loader */
+    private static final int EXISTING_PET_LOADER = 0;
+
+    /* EditText field to enter the pet's name */
     private EditText mNameEditText;
 
-    /** EditText field to enter the pet's breed */
+    /* EditText field to enter the pet's breed */
     private EditText mBreedEditText;
 
-    /** EditText field to enter the pet's weight */
+    /* EditText field to enter the pet's weight */
     private EditText mWeightEditText;
 
-    /** EditText field to enter the pet's gender */
+    /* EditText field to enter the pet's gender */
     private Spinner mGenderSpinner;
 
     /**
@@ -41,20 +49,32 @@ public class EditorActivity extends AppCompatActivity {
      */
     private int mGender = PetsEntry.GENDER_UNKNOWN;
 
+    //Uri to get the which item was pressed
+    Uri currentUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //set the layout for the activity
         setContentView(R.layout.activity_editor);
 
+        //Getting the intent
         Intent intent = getIntent();
-        Uri currentUri = intent.getData();
 
-        if (currentUri == null){
+        //Getting the data from the intent
+        currentUri = intent.getData();
+
+        //Checking what title to set
+
+        if (currentUri == null) {
+            //Open from the new pet button
             setTitle(R.string.editor_activity_title_new_pet);
-        }
-        else {
+        } else {
+            //Open from the item click
             setTitle(R.string.editor_activity_title_edit_pet);
+
+            //Open the thread
+            getLoaderManager().initLoader(EXISTING_PET_LOADER, null, this);
         }
 
         // Find all relevant views that we will need to read user input from
@@ -120,7 +140,7 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                if (insertPetDB()){
+                if (insertPetDB()) {
                     finish();
                 }
                 // Do nothing for now
@@ -151,20 +171,19 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetsEntry.COLUMN_PET_BREED, petBreed);
 
         //pet Gender
-        values.put(PetsEntry.COLUMN_PET_GENDER,mGender);
+        values.put(PetsEntry.COLUMN_PET_GENDER, mGender);
 
         //pet Weight
         String petWeight = mWeightEditText.getText().toString().trim();
 
-        if (!petWeight.isEmpty()){
+        if (!petWeight.isEmpty()) {
             values.put(PetsEntry.COLUMN_PET_WEIGHT, Integer.parseInt(petWeight));
-        }
-        else {
-            Toast.makeText(this,"Weight cannot be null",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Weight cannot be null", Toast.LENGTH_SHORT).show();
         }
 
         //Insert the value into the DB using the context provider
-        Uri uri = getContentResolver().insert(PetsEntry.CONTENT_URI,values);
+        Uri uri = getContentResolver().insert(PetsEntry.CONTENT_URI, values);
 
         if (uri == null) {
             // If the new content URI is null, then there was an error with insertion.
@@ -179,4 +198,63 @@ public class EditorActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        //Select the columns to show
+        String[] projectionQuery = {PetsEntry._ID,
+                PetsEntry.COLUMN_PET_NAME,
+                PetsEntry.COLUMN_PET_BREED,
+                PetsEntry.COLUMN_PET_GENDER,
+                PetsEntry.COLUMN_PET_WEIGHT
+        };
+
+        //Indicate the field to filter
+        String selection = PetsEntry.COLUMN_PET_GENDER + "=?";
+
+        //Indicate the arguments
+        String[] selectionArgs = {String.valueOf(PetsEntry.GENDER_FEMALE)};
+
+        return new CursorLoader(this, currentUri,
+                projectionQuery, null, null, null);
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data == null || data.getCount() < 1) {
+            //No result
+            return;
+        }
+
+        if (data.moveToFirst()) {
+            //Check the columns for the whole items of the table
+            int nameColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_NAME);
+            int breedColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_BREED);
+            int genderColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_GENDER);
+            int weightColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_WEIGHT);
+
+            //Set the values of the fields
+            mNameEditText.setText(data.getString(nameColumnIndex));
+            mBreedEditText.setText(data.getString(breedColumnIndex));
+            mWeightEditText.setText(Integer.toString(data.getInt(weightColumnIndex)));
+            mGender = data.getInt(genderColumnIndex);
+
+            switch (mGender) {
+                case PetsEntry.GENDER_MALE:
+                    mGenderSpinner.setSelection(1);
+                    break;
+                case PetsEntry.GENDER_FEMALE:
+                    mGenderSpinner.setSelection(2);
+                    break;
+                default:
+                    mGenderSpinner.setSelection(0);
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }

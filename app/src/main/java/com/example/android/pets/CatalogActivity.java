@@ -125,12 +125,6 @@ public class CatalogActivity extends AppCompatActivity
                 PetsEntry.COLUMN_PET_BREED,
         };
 
-        //Indicate the field to filter
-        String selection = PetsEntry.COLUMN_PET_GENDER +"=?";
-
-        //Indicate the arguments
-        String[] selectionArgs = {String.valueOf(PetsEntry.GENDER_FEMALE)};
-
         return new CursorLoader(this, PetsEntry.CONTENT_URI,
                 projectionQuery, null, null, null);
     }
