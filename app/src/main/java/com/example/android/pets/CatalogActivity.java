@@ -1,17 +1,20 @@
 package com.example.android.pets;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.pets.data.PetsContract;
@@ -55,6 +58,22 @@ public class CatalogActivity extends AppCompatActivity
         //Set the cursor adapter
         petsCursorAdapter = new PetsCursorAdapter(this,null);
         listView.setAdapter(petsCursorAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Create the intent to open another activity
+                Intent intent = new Intent(CatalogActivity.this,EditorActivity.class);
+
+                //Create the pet Uri
+                Uri currentPetUri = ContentUris.withAppendedId(PetsEntry.CONTENT_URI,id);
+
+                //add new pet uri
+                intent.setData(currentPetUri);
+
+                startActivity(intent);
+            }
+        });
 
         getLoaderManager().initLoader(PET_LOADER,null,this);
     }

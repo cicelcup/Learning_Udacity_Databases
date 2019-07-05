@@ -1,6 +1,7 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -45,6 +46,16 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //set the layout for the activity
         setContentView(R.layout.activity_editor);
+
+        Intent intent = getIntent();
+        Uri currentUri = intent.getData();
+
+        if (currentUri == null){
+            setTitle(R.string.editor_activity_title_new_pet);
+        }
+        else {
+            setTitle(R.string.editor_activity_title_edit_pet);
+        }
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = findViewById(R.id.edit_pet_name);
