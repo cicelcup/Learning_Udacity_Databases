@@ -31,10 +31,13 @@ public class CatalogActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
     //Constant to define the thread number
-    private static int PET_LOADER = 0;
+    static int PET_LOADER = 0;
 
     //Adapter to show the pet information
     PetsCursorAdapter petsCursorAdapter;
+
+    //variable to validate if the data comes with information or not
+    private boolean needToShowDeleteButton = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +47,7 @@ public class CatalogActivity extends AppCompatActivity
         setContentView(R.layout.activity_catalog);
 
         // Setup FAB to open EditorActivity
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
 
         //Click event to open the editor
         fab.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +118,18 @@ public class CatalogActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    //put invisible the delete button of the menu when it's on inserting function
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // If this is a new pet, hide the "Delete" menu item.
+        if (!needToShowDeleteButton) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete_all_entries);
+            menuItem.setVisible(false);
+        }
+        return true;
+    }
+
     private void insertDummyPet() {
         //Create the information to insert using the content provider
         ContentValues values = new ContentValues();
@@ -141,6 +156,16 @@ public class CatalogActivity extends AppCompatActivity
     //Method is called when is finished the thread
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //Check the data to see if delete button is shown or not...
+        if (data.getCount() == 0){
+            needToShowDeleteButton = false;
+        }
+        else {
+            needToShowDeleteButton = true;
+        }
+
+        invalidateOptionsMenu();
+
         //Change the cursor with new data from the DB
         petsCursorAdapter.swapCursor(data);
     }
@@ -150,6 +175,8 @@ public class CatalogActivity extends AppCompatActivity
     public void onLoaderReset(Loader<Cursor> loader) {
         //Empty the cursor
         petsCursorAdapter.swapCursor(null);
+        needToShowDeleteButton = false;
+        invalidateOptionsMenu();
     }
 
     private void showDeleteAllTableDialogConfirmation() {

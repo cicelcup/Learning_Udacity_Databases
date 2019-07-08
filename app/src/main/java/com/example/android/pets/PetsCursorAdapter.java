@@ -13,7 +13,7 @@ import com.example.android.pets.data.PetsContract;
 /** Class for recycler the view of the pets*/
 public class PetsCursorAdapter extends CursorAdapter {
     //Constructor of the cursor adapter
-    public PetsCursorAdapter(Context context, Cursor c) {
+    PetsCursorAdapter(Context context, Cursor c) {
         super(context, c, 0 /*flags*/);
     }
 

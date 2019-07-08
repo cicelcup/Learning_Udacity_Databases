@@ -33,7 +33,7 @@ public class EditorActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
     /*constant to call the loader (thread) */
-    private static final int EXISTING_PET_LOADER = 0;
+    static final int EXISTING_PET_LOADER = 0;
 
     /* EditText field to enter the pet's name */
     private EditText mNameEditText;
@@ -301,7 +301,6 @@ public class EditorActivity extends AppCompatActivity
         //search the information using the current URI and return it
         return new CursorLoader(this, currentUri,
                 projectionQuery, null, null, null);
-
     }
 
     //After the thread is finished
