@@ -3,16 +3,17 @@
 <manifest package="com.example.android.pets"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--Information regarding the app -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!--Main activity to load-->
         <activity
             android:name=".CatalogActivity"
             android:label="@string/app_name">
-            <!--Main activity to load-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -23,11 +24,12 @@
             android:name=".EditorActivity"
             android:theme="@style/EditorTheme"
             android:parentActivityName=".CatalogActivity" >
-            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <!-- Parent activity -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CatalogActivity" />
         </activity>
+        <!--DB Content Provider-->
         <provider
             android:authorities="com.example.android.pets"
             android:name=".data.PetsProvider"

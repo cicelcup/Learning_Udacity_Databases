@@ -8,16 +8,16 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import com.example.android.pets.R;
 import com.example.android.pets.data.PetsContract;
 
+/** Class for recycler the view of the pets*/
 public class PetsCursorAdapter extends CursorAdapter {
     //Constructor of the cursor adapter
     public PetsCursorAdapter(Context context, Cursor c) {
         super(context, c, 0 /*flags*/);
     }
 
-    //Inflate the layout to implement the new view
+    //Inflate the layout list_item to implement the new view
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         return LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
@@ -26,14 +26,23 @@ public class PetsCursorAdapter extends CursorAdapter {
     //Bind the view with the cursor information
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+
         //Text View for the name
         TextView petNameView = view.findViewById(R.id.pet_name);
+
+        //Check the index of the column in the table
         int petNameIndex = cursor.getColumnIndex(PetsContract.PetsEntry.COLUMN_PET_NAME);
+
+        //Set the name
         petNameView.setText(cursor.getString(petNameIndex));
 
         //Text View for the breed
         TextView breedNameView = view.findViewById(R.id.pet_breed);
+
+        //Check the index of the column in the table
         int petBreedIndex = cursor.getColumnIndex(PetsContract.PetsEntry.COLUMN_PET_BREED);
+
+        //Set the breed
         String petBreed = cursor.getString(petBreedIndex);
 
 

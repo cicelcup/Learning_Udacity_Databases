@@ -4,16 +4,23 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+/* This is a class where it's defined all the variables related to the database. It's defined the
+ * URI (content authority, path for the database, name of the table, names of the fields and
+  * constant types for the get method */
+
 public final class PetsContract {
     //Private Constructor for not allowing the creation of a instance of this class
 
     private PetsContract() { }
 
     //constants for the content provider
+
     //Content Authority
     static final String CONTENT_AUTHORITY = "com.example.android.pets";
+
     //Base content Uri (content// + Content Authority)
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
     //Table name
     static final String PATH_PETS = "pets";
 
@@ -24,7 +31,6 @@ public final class PetsContract {
 
         /** The content URI to access the pet data in the provider */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_PETS);
-
 
         //Name of the table for pets
         final static String TABLE_NAME = "pets";

@@ -23,12 +23,13 @@ import android.widget.Toast;
 import com.example.android.pets.data.PetsContract.PetsEntry;
 
 /**
- * Allows user to create a new pet or edit an existing one.
+ * Allows user to create a new pet or edit an existing one. If it's need to load a pet, it's used a
+ * loader (thread) to query the information
  */
 public class EditorActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /*constant to call the loader */
+    /*constant to call the loader (thread) */
     private static final int EXISTING_PET_LOADER = 0;
 
     /* EditText field to enter the pet's name */
@@ -49,7 +50,7 @@ public class EditorActivity extends AppCompatActivity
      */
     private int mGender = PetsEntry.GENDER_UNKNOWN;
 
-    //Uri to get the which item was pressed
+    //Uri to get the item which was pressed
     Uri currentUri;
 
     @Override
@@ -64,13 +65,13 @@ public class EditorActivity extends AppCompatActivity
         //Getting the data from the intent
         currentUri = intent.getData();
 
-        //Checking what title to set
+        //Checking what title to set and what option for the editor activity (edit or add pet)
 
         if (currentUri == null) {
-            //Open from the new pet button
+            //Open from the new pet button. Set the new pet text
             setTitle(R.string.editor_activity_title_new_pet);
         } else {
-            //Open from the item click
+            //Open from the item click. Set the edit text and execute the loader for query the db
             setTitle(R.string.editor_activity_title_edit_pet);
 
             //Open the thread
@@ -106,6 +107,7 @@ public class EditorActivity extends AppCompatActivity
         mGenderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Check the selection to define the value of the gender
                 String selection = (String) parent.getItemAtPosition(position);
                 if (!TextUtils.isEmpty(selection)) {
                     if (selection.equals(getString(R.string.gender_male))) {
@@ -121,7 +123,7 @@ public class EditorActivity extends AppCompatActivity
             // Because AdapterView is an abstract class, onNothingSelected must be defined
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                mGender = 0; // Unknown
+                mGender = PetsEntry.GENDER_UNKNOWN; // Unknown
             }
         });
     }
@@ -141,14 +143,16 @@ public class EditorActivity extends AppCompatActivity
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 if (savePetDB()) {
+                    //Close the activity and return back to the previous activity
                     finish();
                 }
-                // Do nothing for now
                 return true;
+
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 // Do nothing for now
                 return true;
+
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
                 // Navigate back to parent activity (CatalogActivity)
@@ -176,15 +180,19 @@ public class EditorActivity extends AppCompatActivity
         //pet Weight
         String petWeight = mWeightEditText.getText().toString().trim();
 
+        //Check if the pet weight is empty or not
         if (!petWeight.isEmpty()) {
             values.put(PetsEntry.COLUMN_PET_WEIGHT, Integer.parseInt(petWeight));
         } else {
             Toast.makeText(this, "Weight cannot be null", Toast.LENGTH_SHORT).show();
         }
 
-        if (currentUri == null){
+        //Check if the action is related to insert or related to update
+        if (currentUri == null) {
             //Insert the value into the DB using the context provider
             Uri uri = getContentResolver().insert(PetsEntry.CONTENT_URI, values);
+
+            //Checking the result of the insert action
 
             if (uri == null) {
                 // If the new content URI is null, then there was an error with insertion.
@@ -197,17 +205,18 @@ public class EditorActivity extends AppCompatActivity
                         Toast.LENGTH_SHORT).show();
                 return true;
             }
-        }
-        else{
+        } else {
+            //update the DB record
             int rowsAffected = getContentResolver().update(
                     currentUri, values, null, null);
 
-            if(rowsAffected == 0){
+            //Checking the result of the update action
+
+            if (rowsAffected == 0) {
                 Toast.makeText(this, getString(R.string.editor_save_pet_failed),
                         Toast.LENGTH_SHORT).show();
                 return false;
-            }
-            else{
+            } else {
                 Toast.makeText(this, getString(R.string.editor_save_pet_successful),
                         Toast.LENGTH_SHORT).show();
                 return true;
@@ -216,9 +225,10 @@ public class EditorActivity extends AppCompatActivity
 
     }
 
+    //Thread to load the information from the database
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        //Select the columns to show
+        //Select the columns to show (the whole table)
         String[] projectionQuery = {PetsEntry._ID,
                 PetsEntry.COLUMN_PET_NAME,
                 PetsEntry.COLUMN_PET_BREED,
@@ -226,12 +236,7 @@ public class EditorActivity extends AppCompatActivity
                 PetsEntry.COLUMN_PET_WEIGHT
         };
 
-        //Indicate the field to filter
-        String selection = PetsEntry.COLUMN_PET_GENDER + "=?";
-
-        //Indicate the arguments
-        String[] selectionArgs = {String.valueOf(PetsEntry.GENDER_FEMALE)};
-
+        //search the information using the current URI and return it
         return new CursorLoader(this, currentUri,
                 projectionQuery, null, null, null);
 
@@ -245,34 +250,36 @@ public class EditorActivity extends AppCompatActivity
             return;
         }
 
-        if (data.moveToFirst()) {
-            //Check the columns for the whole items of the table
-            int nameColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_NAME);
-            int breedColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_BREED);
-            int genderColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_GENDER);
-            int weightColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_WEIGHT);
+        //move the cursor to the first element
+        data.moveToFirst();
 
-            //Set the values of the fields
-            mNameEditText.setText(data.getString(nameColumnIndex));
-            mBreedEditText.setText(data.getString(breedColumnIndex));
-            mWeightEditText.setText(String.valueOf(data.getInt(weightColumnIndex)));
-            mGender = data.getInt(genderColumnIndex);
+        //Check the columns for the whole items of the table
+        int nameColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_NAME);
+        int breedColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_BREED);
+        int genderColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_GENDER);
+        int weightColumnIndex = data.getColumnIndex(PetsEntry.COLUMN_PET_WEIGHT);
 
-            switch (mGender) {
-                case PetsEntry.GENDER_MALE:
-                    mGenderSpinner.setSelection(1);
-                    break;
-                case PetsEntry.GENDER_FEMALE:
-                    mGenderSpinner.setSelection(2);
-                    break;
-                default:
-                    mGenderSpinner.setSelection(0);
-                    break;
-            }
+        //get the values of the fields and settled on the views
+        mNameEditText.setText(data.getString(nameColumnIndex));
+        mBreedEditText.setText(data.getString(breedColumnIndex));
+        mWeightEditText.setText(String.valueOf(data.getInt(weightColumnIndex)));
+        mGender = data.getInt(genderColumnIndex);
+
+        switch (mGender) {
+            case PetsEntry.GENDER_MALE:
+                mGenderSpinner.setSelection(1);
+                break;
+            case PetsEntry.GENDER_FEMALE:
+                mGenderSpinner.setSelection(2);
+                break;
+            default:
+                mGenderSpinner.setSelection(0);
+                break;
         }
+
     }
 
-    //Reset the thread
+    //Reset the thread and put all the views in empty state
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mNameEditText.setText("");

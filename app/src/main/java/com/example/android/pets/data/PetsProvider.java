@@ -9,21 +9,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-import static com.example.android.pets.data.PetsContract.CONTENT_AUTHORITY;
-import static com.example.android.pets.data.PetsContract.PATH_PETS;
-import static com.example.android.pets.data.PetsContract.PetsEntry.COLUMN_PET_GENDER;
-import static com.example.android.pets.data.PetsContract.PetsEntry.COLUMN_PET_NAME;
-import static com.example.android.pets.data.PetsContract.PetsEntry.COLUMN_PET_WEIGHT;
-import static com.example.android.pets.data.PetsContract.PetsEntry.CONTENT_ITEM_TYPE;
-import static com.example.android.pets.data.PetsContract.PetsEntry.CONTENT_LIST_TYPE;
-import static com.example.android.pets.data.PetsContract.PetsEntry.TABLE_NAME;
-import static com.example.android.pets.data.PetsContract.PetsEntry._ID;
-import static com.example.android.pets.data.PetsContract.PetsEntry.isValidGender;
+import static com.example.android.pets.data.PetsContract.*;
+import static com.example.android.pets.data.PetsContract.PetsEntry.*;
 
 //Content Provider for the database
 public class PetsProvider extends ContentProvider {
-    //Database Helper and database definition
+    //Database Helper
     private PetsHelper petsHelper;
+
+    //Database definition
     private SQLiteDatabase db;
 
     //URI Information for decide the case (values are chosen arbitrary)
@@ -47,6 +41,8 @@ public class PetsProvider extends ContentProvider {
     //Initialize the content provider
     @Override
     public boolean onCreate() {
+        //Initialize the pets helper object
+
         petsHelper = new PetsHelper(getContext());
         return true;
     }
@@ -62,7 +58,7 @@ public class PetsProvider extends ContentProvider {
         //Open the cursor
         Cursor queryCursor;
 
-        //Check the URI arrived
+        //Check the URI arrived, compare with the matcher to evalue the switch
         final int match = sUriMatcher.match(uri);
 
         switch (match) {
@@ -81,7 +77,7 @@ public class PetsProvider extends ContentProvider {
             case PET_ID:
                 //Select the id
                 selection = _ID + "=?";
-                // Select value to filter
+                // Select value to filter (check for the id)
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 //do the query
                 queryCursor = db.query(TABLE_NAME,
@@ -98,13 +94,15 @@ public class PetsProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
 
-        //Set the notification when the data change.
+        //Set the notification when the data change using the uri as key
         queryCursor.setNotificationUri(getContext().getContentResolver(),uri);
         //Return the cursor
         return queryCursor;
     }
 
-    //Returns the MIME type of data for the content URI
+    /*Returns the MIME type of data for the content URI. This is method if to declare if we have one
+    item or a dir */
+
     @Override
     public String getType(Uri uri) {
 
@@ -123,7 +121,7 @@ public class PetsProvider extends ContentProvider {
         }
     }
 
-    //Insert using the content provider
+    //Insert using the content provider (return an Uri
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         //Check the URI arrived
@@ -141,8 +139,9 @@ public class PetsProvider extends ContentProvider {
         //Enable to write the database
         db = petsHelper.getWritableDatabase();
 
-        //Check the data
+        //Check the data using the sanity Check method
         if (sanityCheck(values)) {
+            //Insert the value into the DB
             long id = db.insert(TABLE_NAME, null, values);
 
             if (id == -1) {
@@ -150,9 +149,11 @@ public class PetsProvider extends ContentProvider {
                 return null;
             }
 
-            //Set the notification of the uri
+            //Notify the insert of the record
             getContext().getContentResolver().notifyChange(uri,null);
-            //Insert the value into the DB
+
+            //Return the uri for the insert
+
             return ContentUris.withAppendedId(uri, id);
         } else {
             return null;
@@ -189,13 +190,14 @@ public class PetsProvider extends ContentProvider {
         }
 
         if(rowsDeleted !=0){
+            //Notify the row was deleted
             getContext().getContentResolver().notifyChange(uri,null);
         }
 
         return rowsDeleted;
     }
 
-    /*method to update the database*/
+    /*method to update the database through the content provider*/
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
@@ -216,6 +218,7 @@ public class PetsProvider extends ContentProvider {
         }
     }
 
+    /*method to update the database*/
     private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 
         //Open the database
@@ -225,10 +228,11 @@ public class PetsProvider extends ContentProvider {
         if (sanityCheck(values)) {
             //Check if the size of values is different than 0
             if (values.size() != 0) {
-                //Notify the change
+
                 int rowsUpdate = db.update(TABLE_NAME, values, selection, selectionArgs);
 
                 if(rowsUpdate !=0){
+                    //Notify the change
                     getContext().getContentResolver().notifyChange(uri,null);
                 }
                 return rowsUpdate;
@@ -258,7 +262,8 @@ public class PetsProvider extends ContentProvider {
         }
 
         Integer weight = values.getAsInteger(COLUMN_PET_WEIGHT);
-        //Check if the weight is valid or not
+
+        //Check if the weight is valid or not (different than null and greater than 0)
         return weight != null && weight >= 0;
     }
 }
