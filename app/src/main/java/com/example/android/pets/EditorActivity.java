@@ -420,23 +420,22 @@ public class EditorActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-    private boolean deletePetDB() {
+    private void deletePetDB() {
 
-        //delete the DB record
-        int rowsAffected = getContentResolver().delete(currentUri, null, null);
+        if (currentUri != null){
+            //delete the DB record
+            int rowsAffected = getContentResolver().delete(currentUri, null, null);
 
-        //Checking the result of the delete action
+            //Checking the result of the delete action
 
-        if (rowsAffected == 0) {
-            Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
-                    Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            Toast.makeText(this, getString(R.string.editor_delete_pet_successful),
-                    Toast.LENGTH_SHORT).show();
-            finish();
-            return true;
+            if (rowsAffected == 0) {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_successful),
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
-
     }
 }
