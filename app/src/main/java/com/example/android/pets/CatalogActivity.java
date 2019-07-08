@@ -1,9 +1,11 @@
 package com.example.android.pets;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -16,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetsContract;
 import com.example.android.pets.data.PetsContract.PetsEntry;
@@ -60,7 +63,7 @@ public class CatalogActivity extends AppCompatActivity
         listView.setEmptyView(emptyView);
 
         //Set the cursor adapter (null because is the loader who fill the adapter)
-        petsCursorAdapter = new PetsCursorAdapter(this,null);
+        petsCursorAdapter = new PetsCursorAdapter(this, null);
         listView.setAdapter(petsCursorAdapter);
 
         //define the click event for the list
@@ -68,10 +71,10 @@ public class CatalogActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Create the intent to open another activity
-                Intent intent = new Intent(CatalogActivity.this,EditorActivity.class);
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
 
                 //Create the pet Uri to send it into the intent
-                Uri currentPetUri = ContentUris.withAppendedId(PetsEntry.CONTENT_URI,id);
+                Uri currentPetUri = ContentUris.withAppendedId(PetsEntry.CONTENT_URI, id);
 
                 //add new pet uri into the intent
                 intent.setData(currentPetUri);
@@ -81,7 +84,7 @@ public class CatalogActivity extends AppCompatActivity
         });
 
         //Initiate the thread for the database
-        getLoaderManager().initLoader(PET_LOADER,null,this);
+        getLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
     //Created the option menu in the activity
@@ -105,7 +108,8 @@ public class CatalogActivity extends AppCompatActivity
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                //delete all DB
+                showDeleteAllTableDialogConfirmation();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -114,11 +118,11 @@ public class CatalogActivity extends AppCompatActivity
     private void insertDummyPet() {
         //Create the information to insert using the content provider
         ContentValues values = new ContentValues();
-        values.put(PetsContract.PetsEntry.COLUMN_PET_NAME,"Tululi");
+        values.put(PetsContract.PetsEntry.COLUMN_PET_NAME, "Tululi");
         values.put(PetsContract.PetsEntry.COLUMN_PET_BREED, "Shitzu");
         values.put(PetsContract.PetsEntry.COLUMN_PET_GENDER, PetsContract.PetsEntry.GENDER_MALE);
-        values.put(PetsContract.PetsEntry.COLUMN_PET_WEIGHT,75);
-        getContentResolver().insert(PetsEntry.CONTENT_URI,values);
+        values.put(PetsContract.PetsEntry.COLUMN_PET_WEIGHT, 75);
+        getContentResolver().insert(PetsEntry.CONTENT_URI, values);
     }
 
     //Creating the thread for the loader
@@ -143,9 +147,59 @@ public class CatalogActivity extends AppCompatActivity
 
     //Resetting the thread
     @Override
-    public void onLoaderReset(Loader<Cursor> loader)
-    {
+    public void onLoaderReset(Loader<Cursor> loader) {
         //Empty the cursor
         petsCursorAdapter.swapCursor(null);
+    }
+
+    private void showDeleteAllTableDialogConfirmation() {
+        //Create the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        //Set the title message
+        builder.setMessage(R.string.delete_all_pet_dialog_msg);
+
+        //Set the positive button message (it will delete or not)
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //The user confirm the delete action
+                deleteAllPetDB();
+            }
+
+        });
+
+        //Set the negative button
+        builder
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //user cancel the deletion
+                        dialog.dismiss();
+                    }
+                });
+
+        //Create the alert dialog with the builder
+        AlertDialog alertDialog = builder.create();
+
+        //Show the dialog
+        alertDialog.show();
+    }
+
+    private void deleteAllPetDB() {
+
+        //delete the DB record
+        int rowsAffected = getContentResolver().delete(PetsEntry.CONTENT_URI,
+                null, null);
+
+        //Checking the result of the delete action
+
+        if (rowsAffected == 0) {
+            Toast.makeText(this, getString(R.string.editor_delete_pet_table_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, getString(R.string.editor_delete_pet_table_successful),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }
