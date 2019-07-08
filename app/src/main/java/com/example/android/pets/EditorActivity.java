@@ -1,8 +1,10 @@
 package com.example.android.pets;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -13,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -53,6 +56,23 @@ public class EditorActivity extends AppCompatActivity
     //Uri to get the item which was pressed
     Uri currentUri;
 
+    //variable to check if the pet has changed or not
+    private boolean mPetHasChanged = false;
+
+
+    /**
+     * OnTouchListener that listens for any user touches on a View, implying that they are modifying
+     * the view, and we change the mPetHasChanged boolean to true.
+     */
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            mPetHasChanged = true;
+            return false;
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +103,14 @@ public class EditorActivity extends AppCompatActivity
         mBreedEditText = findViewById(R.id.edit_pet_breed);
         mWeightEditText = findViewById(R.id.edit_pet_weight);
         mGenderSpinner = findViewById(R.id.spinner_gender);
+
+        //Set the on Touch Listener to see if some item was touched or not
+        // (for the discard confirmation)
+
+        mNameEditText.setOnTouchListener(mTouchListener);
+        mBreedEditText.setOnTouchListener(mTouchListener);
+        mWeightEditText.setOnTouchListener(mTouchListener);
+        mGenderSpinner.setOnTouchListener(mTouchListener);
 
         setupSpinner(); //function to set up the spinner
     }
@@ -128,6 +156,18 @@ public class EditorActivity extends AppCompatActivity
         });
     }
 
+    //Override the back pressed method to show the confirmation dialog
+    @Override
+    public void onBackPressed() {
+        //if nothing is changed, the activity discard without the dialog confirmation
+        if (!mPetHasChanged) {
+            super.onBackPressed();
+            return;
+        }
+
+        showUnSavedDialogConfirmation();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_editor.xml file.
@@ -155,8 +195,16 @@ public class EditorActivity extends AppCompatActivity
 
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
+
+                //Check to see if some item has been touched or not
+                if (!mPetHasChanged) {
+                    NavUtils.navigateUpFromSameTask(this);
+                    return true;
+                }
+
                 // Navigate back to parent activity (CatalogActivity)
-                NavUtils.navigateUpFromSameTask(this);
+                showUnSavedDialogConfirmation();
+
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -286,5 +334,42 @@ public class EditorActivity extends AppCompatActivity
         mBreedEditText.setText("");
         mWeightEditText.setText("");
         mGenderSpinner.setSelection(0);
+    }
+
+    /*Method to show the confirmation to discard the register of the information*/
+
+    private void showUnSavedDialogConfirmation()
+    {
+        //Create the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        //Set the title message
+        builder.setMessage(R.string.unsaved_changes_dialog_msg);
+
+        //Set the positive button message (it will discard the edition)
+        builder.setPositiveButton(R.string.discard, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //The user discard the editing
+                finish();
+            }
+        });
+
+        //Set the negative button
+        builder
+                .setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        /*User click the keep editing button, close the dialog
+                         and continuing editing the pet */
+                        dialog.dismiss();
+                    }
+                });
+
+        //Create the alert dialog with the builder
+        AlertDialog alertDialog = builder.create();
+
+        //Show the dialog
+        alertDialog.show();
     }
 }
