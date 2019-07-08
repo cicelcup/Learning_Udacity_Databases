@@ -90,6 +90,8 @@ public class EditorActivity extends AppCompatActivity
         if (currentUri == null) {
             //Open from the new pet button. Set the new pet text
             setTitle(R.string.editor_activity_title_new_pet);
+
+            invalidateOptionsMenu();
         } else {
             //Open from the item click. Set the edit text and execute the loader for query the db
             setTitle(R.string.editor_activity_title_edit_pet);
@@ -173,6 +175,18 @@ public class EditorActivity extends AppCompatActivity
         // Inflate the menu options from the res/menu/menu_editor.xml file.
         // This adds menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_editor, menu);
+        return true;
+    }
+
+    //put invisible the delete button of the menu when it's on inserting function
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // If this is a new pet, hide the "Delete" menu item.
+        if (currentUri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
         return true;
     }
 
