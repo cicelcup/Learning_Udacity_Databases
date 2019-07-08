@@ -204,7 +204,7 @@ public class EditorActivity extends AppCompatActivity
 
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Do nothing for now
+                showDeleteDialogConfirmation();
                 return true;
 
             // Respond to a click on the "Up" arrow button in the app bar
@@ -352,8 +352,7 @@ public class EditorActivity extends AppCompatActivity
 
     /*Method to show the confirmation to discard the register of the information*/
 
-    private void showUnSavedDialogConfirmation()
-    {
+    private void showUnSavedDialogConfirmation() {
         //Create the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -385,5 +384,59 @@ public class EditorActivity extends AppCompatActivity
 
         //Show the dialog
         alertDialog.show();
+    }
+
+    private void showDeleteDialogConfirmation() {
+        //Create the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        //Set the title message
+        builder.setMessage(R.string.delete_dialog_msg);
+
+        //Set the positive button message (it will delete or not)
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //The user confirm the delete action
+                deletePetDB();
+            }
+
+        });
+
+        //Set the negative button
+        builder
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //user cancel the deletion
+                        dialog.dismiss();
+                    }
+                });
+
+        //Create the alert dialog with the builder
+        AlertDialog alertDialog = builder.create();
+
+        //Show the dialog
+        alertDialog.show();
+    }
+
+    private boolean deletePetDB() {
+
+        //delete the DB record
+        int rowsAffected = getContentResolver().delete(currentUri, null, null);
+
+        //Checking the result of the delete action
+
+        if (rowsAffected == 0) {
+            Toast.makeText(this, getString(R.string.editor_delete_pet_failed),
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        } else {
+            Toast.makeText(this, getString(R.string.editor_delete_pet_successful),
+                    Toast.LENGTH_SHORT).show();
+            finish();
+            return true;
+        }
+
     }
 }
