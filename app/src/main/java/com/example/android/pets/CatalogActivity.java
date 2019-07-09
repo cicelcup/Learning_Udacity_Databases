@@ -1,17 +1,18 @@
 package com.example.android.pets;
 
 import android.app.AlertDialog;
-import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -87,7 +88,8 @@ public class CatalogActivity extends AppCompatActivity
         });
 
         //Initiate the thread for the database
-        getLoaderManager().initLoader(PET_LOADER, null, this);
+        LoaderManager loaderManager = LoaderManager.getInstance(this);
+        loaderManager.initLoader(PET_LOADER, null, this);
     }
 
     //Created the option menu in the activity
@@ -141,6 +143,7 @@ public class CatalogActivity extends AppCompatActivity
     }
 
     //Creating the thread for the loader
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //Select the columns to show (only name and breed as it was defined into the adapter)
@@ -155,24 +158,21 @@ public class CatalogActivity extends AppCompatActivity
 
     //Method is called when is finished the thread
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader,
+                               Cursor data) {
         //Check the data to see if delete button is shown or not...
-        if (data.getCount() == 0){
-            needToShowDeleteButton = false;
-        }
-        else {
-            needToShowDeleteButton = true;
-        }
+        needToShowDeleteButton = data.getCount() != 0;
 
         invalidateOptionsMenu();
 
         //Change the cursor with new data from the DB
         petsCursorAdapter.swapCursor(data);
+
     }
 
     //Resetting the thread
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
         //Empty the cursor
         petsCursorAdapter.swapCursor(null);
         needToShowDeleteButton = false;
@@ -214,7 +214,6 @@ public class CatalogActivity extends AppCompatActivity
     }
 
     private void deleteAllPetDB() {
-
         //delete the DB record
         int rowsAffected = getContentResolver().delete(PetsEntry.CONTENT_URI,
                 null, null);

@@ -1,16 +1,17 @@
 package com.example.android.pets;
 
 import android.app.AlertDialog;
-import android.app.LoaderManager;
 import android.content.ContentValues;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -97,7 +98,8 @@ public class EditorActivity extends AppCompatActivity
             setTitle(R.string.editor_activity_title_edit_pet);
 
             //Open the thread
-            getLoaderManager().initLoader(EXISTING_PET_LOADER, null, this);
+            LoaderManager loaderManager = LoaderManager.getInstance(this);
+            loaderManager.initLoader(EXISTING_PET_LOADER, null, this);
         }
 
         // Find all relevant views that we will need to read user input from
@@ -288,6 +290,7 @@ public class EditorActivity extends AppCompatActivity
     }
 
     //Thread to load the information from the database
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //Select the columns to show (the whole table)
@@ -305,7 +308,8 @@ public class EditorActivity extends AppCompatActivity
 
     //After the thread is finished
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader,
+                               Cursor data) {
         if (data == null || data.getCount() < 1) {
             //No result
             return;
@@ -342,7 +346,7 @@ public class EditorActivity extends AppCompatActivity
 
     //Reset the thread and put all the views in empty state
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
         mNameEditText.setText("");
         mBreedEditText.setText("");
         mWeightEditText.setText("");
