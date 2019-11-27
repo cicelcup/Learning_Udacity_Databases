@@ -57,17 +57,18 @@ public class EditorActivity extends AppCompatActivity
     //Uri to get the item which was pressed
     Uri currentUri;
 
-    //variable to check if the pet has changed or not
+    //variable to check if the pet has changed or not in the editor activity
     private boolean mPetHasChanged = false;
 
 
     /**
-     * OnTouchListener that listens for any user touches on a View, implying that they are modifying
+     * OnTouchListener Variable that listens for any user touches on a View, implying that they are modifying
      * the view, and we change the mPetHasChanged boolean to true.
      */
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
+//            the variable to control the edition has changed to true
             mPetHasChanged = true;
             return false;
         }
@@ -83,7 +84,7 @@ public class EditorActivity extends AppCompatActivity
         //Getting the intent
         Intent intent = getIntent();
 
-        //Getting the data from the intent
+        //Getting the data from the intent sending from the catalog activity
         currentUri = intent.getData();
 
         //Checking what title to set and what option for the editor activity (edit or add pet)
@@ -97,7 +98,7 @@ public class EditorActivity extends AppCompatActivity
             //Open from the item click. Set the edit text and execute the loader for query the db
             setTitle(R.string.editor_activity_title_edit_pet);
 
-            //Open the thread
+            //Open the thread and load the loadManager throught the create loader function
             LoaderManager loaderManager = LoaderManager.getInstance(this);
             loaderManager.initLoader(EXISTING_PET_LOADER, null, this);
         }
@@ -152,7 +153,8 @@ public class EditorActivity extends AppCompatActivity
                 }
             }
 
-            // Because AdapterView is an abstract class, onNothingSelected must be defined
+            // Because AdapterView for the spinner is an abstract class,
+            // onNothingSelected must be defined in case nothing is selected
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 mGender = PetsEntry.GENDER_UNKNOWN; // Unknown
@@ -168,7 +170,7 @@ public class EditorActivity extends AppCompatActivity
             super.onBackPressed();
             return;
         }
-
+//show the confirmation dialog before to confirm if the data will be lost or not
         showUnSavedDialogConfirmation();
     }
 
@@ -204,7 +206,7 @@ public class EditorActivity extends AppCompatActivity
                 }
                 return true;
 
-            // Respond to a click on the "Delete" menu option
+            // Respond to a click on the "Delete" menu option and show the delete dialog confirmation
             case R.id.action_delete:
                 showDeleteDialogConfirmation();
                 return true;

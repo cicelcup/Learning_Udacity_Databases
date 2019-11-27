@@ -37,7 +37,7 @@ public class CatalogActivity extends AppCompatActivity
     //Adapter to show the pet information
     PetsCursorAdapter petsCursorAdapter;
 
-    //variable to validate if the data comes with information or not
+    //variable to validate if the data comes with information or not to show the delete button
     private boolean needToShowDeleteButton = true;
 
     @Override
@@ -70,7 +70,7 @@ public class CatalogActivity extends AppCompatActivity
         petsCursorAdapter = new PetsCursorAdapter(this, null);
         listView.setAdapter(petsCursorAdapter);
 
-        //define the click event for the list
+        //define the click event for the list to open the catalog activity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -113,7 +113,7 @@ public class CatalogActivity extends AppCompatActivity
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                //delete all DB
+                //delete all DB after showing the all table delete dialog confirmation
                 showDeleteAllTableDialogConfirmation();
                 return true;
         }
@@ -124,7 +124,8 @@ public class CatalogActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        // If this is a new pet, hide the "Delete" menu item.
+        // If this is a new pet, hide the "Delete" menu item. if the
+//        needtoshowdeletebutton is false, then hide the option
         if (!needToShowDeleteButton) {
             MenuItem menuItem = menu.findItem(R.id.action_delete_all_entries);
             menuItem.setVisible(false);
@@ -132,6 +133,7 @@ public class CatalogActivity extends AppCompatActivity
         return true;
     }
 
+//    function to insert dummy data into the database to show the function of the database
     private void insertDummyPet() {
         //Create the information to insert using the content provider
         ContentValues values = new ContentValues();
@@ -142,7 +144,7 @@ public class CatalogActivity extends AppCompatActivity
         getContentResolver().insert(PetsEntry.CONTENT_URI, values);
     }
 
-    //Creating the thread for the loader
+    //Creating the thread for the loader for querying the database
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -156,7 +158,7 @@ public class CatalogActivity extends AppCompatActivity
                 projectionQuery, null, null, null);
     }
 
-    //Method is called when is finished the thread
+    //Method is called when is finished the thread. Here set the data information into the adapter
     @Override
     public void onLoadFinished(@NonNull android.support.v4.content.Loader<Cursor> loader,
                                Cursor data) {
@@ -170,7 +172,9 @@ public class CatalogActivity extends AppCompatActivity
 
     }
 
-    //Resetting the thread
+    //Resetting the thread, setting the cursor to null, the control variable to false and changing
+    // the menu for hiding the options menu
+
     @Override
     public void onLoaderReset(@NonNull android.support.v4.content.Loader<Cursor> loader) {
         //Empty the cursor
@@ -179,6 +183,7 @@ public class CatalogActivity extends AppCompatActivity
         invalidateOptionsMenu();
     }
 
+    //function to create the dialog to confirm if it will delete the database or not
     private void showDeleteAllTableDialogConfirmation() {
         //Create the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -213,13 +218,13 @@ public class CatalogActivity extends AppCompatActivity
         alertDialog.show();
     }
 
+//function to delete all the information in the database
     private void deleteAllPetDB() {
-        //delete the DB record
+        //delete the DB record using the content resolver
         int rowsAffected = getContentResolver().delete(PetsEntry.CONTENT_URI,
                 null, null);
 
-        //Checking the result of the delete action
-
+        //Checking the result of the delete action to define which message to show
         if (rowsAffected == 0) {
             Toast.makeText(this, getString(R.string.editor_delete_pet_table_failed),
                     Toast.LENGTH_SHORT).show();
